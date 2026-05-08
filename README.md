@@ -10,6 +10,11 @@
   </a>
 </p>
 
+<p align="center">
+  <img src="master_supporting_docs/supporting_papers/codex-stata-for-economists-logo.png" width="80%">
+</p>
+
+
 # 面向经管专业的 Stata 可复现 Codex 工作流
 
 **作者：** 朱 晨 | 遗传社科研究 Chen Zhu | China Agricultural University (CAU)
