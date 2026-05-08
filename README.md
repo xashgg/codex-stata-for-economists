@@ -12,7 +12,7 @@
 
 本仓库原本包含 Claude Code 配置；现在已经改为 **Codex 优先、Claude Code 兼容** 的结构。Codex 进入项目后应优先读取 `AGENTS.md`，原有 `.claude/` 和 `CLAUDE.md` 保留用于兼容 Claude Code，也可作为更详细的规则参考。
 
-## English Overview
+## Pipeline Overview
 
 **Codex Stata for Economists** is a reproducible Stata research workflow template for empirical economics and business-school research.
 
@@ -36,6 +36,11 @@ Short description for sharing:
 <p align="center">
   <img src="explorations/mroz_tutorial/output/figures/mroz_faminc_histogram.png" width="45%">
   <img src="explorations/mroz_tutorial/output/figures/mroz_wage_educ_scatter.png" width="45%">
+</p>
+
+<p align="center">
+  <img src="explorations/cox_hazard_ratio_simulation/output/figures/cox_survival_curve_simulation.png" width="45%">
+  <img src="explorations/staggered_did_simulation/output/figures/csdid_event_study.png" width="45%">
 </p>
 
 
