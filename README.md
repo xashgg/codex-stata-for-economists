@@ -89,13 +89,14 @@ codex
 
 ## 支持的分析类型
 
-本仓库默认支持常见 Stata 实证分析流程，包括描述统计、图形、OLS、固定效应回归、IV、事件研究、DID 和 DDML。正式分析通常放在 `dofiles/03_analysis/`，并通过 `dofiles/00_master.do` 串联到完整流水线。
+本仓库默认支持常见 Stata 实证分析流程，包括描述统计、图形、OLS、固定效应回归、IV、事件研究、DID、DDML 和 Cox hazard ratio / 生存分析示例。正式分析通常放在 `dofiles/03_analysis/`，并通过 `dofiles/00_master.do` 串联到完整流水线；尚在测试或教学阶段的方法先放在 `explorations/`。
 
 当前 DID/DDML 支持包括：
 
 - 基础 DID / TWFE：使用 `reghdfe` 吸收个体和时间固定效应，并按处理分配层级聚类标准误。
 - Staggered DID：模板支持 `csdid` 估计 Callaway-Sant'Anna group-time ATT、总体 ATT、pre-trend 检查和事件研究输出。
 - DDML：模板支持 `ddml + rlasso` 的部分线性模型，适合 Stata 15；Stata 16+ 且配置 Python/scikit-learn 后，可切换到 `pystacked` 学习器。
+- Cox hazard ratio / 生存分析：`explorations/cox_hazard_ratio_simulation/` 提供自包含模拟示例，展示 `stset`、`stcox, hr`、比例风险假设诊断和生存曲线导出。正式研究需要使用真实 time-to-event 变量时，可在确认变量定义后迁入 `dofiles/03_analysis/`。
 - 依赖管理：`dofiles/00_master.do` 会记录 DID/DDML 命令是否可用；首次使用时可把 `local INSTALL_DEPS = 1` 打开安装核心包，安装后改回 `0`。
 
 可复制模板：

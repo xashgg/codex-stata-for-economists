@@ -124,6 +124,7 @@ The production pipeline supports common Stata empirical workflows:
 - event studies;
 - DID, including TWFE and staggered DID templates;
 - DDML templates using `ddml` and `rlasso`;
+- Cox hazard-ratio / survival-analysis examples using `stset`, `stcox, hr`, proportional-hazards diagnostics, and survival-curve exports under `explorations/cox_hazard_ratio_simulation/`;
 - Quarto reports downstream of output files.
 
 Method tests and simulations should start under `explorations/`. Current examples include:
