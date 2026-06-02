@@ -74,6 +74,9 @@ bash scripts/run_pipeline.sh
 # Render the Markdown/PDF report (Quarto + Stata engine)
 quarto render reports/analysis_report.qmd
 
+# If Quarto is only available through RStudio on this Windows machine
+& 'C:\Program Files\RStudio\resources\app\bin\quarto\bin\quarto.exe' render reports\analysis_report.qmd
+
 # Pre-commit data-safety check (recommended as git pre-commit hook)
 python scripts/check_data_safety.py --staged $(git diff --cached --name-only)
 
@@ -90,6 +93,7 @@ python scripts/quality_score.py dofiles/03_analysis/main_regression.do
   **Do NOT use Stata 18** even though it is installed — version mismatches break reproducibility.
 - **Python on this machine:** Miniconda at `C:\ProgramData\Miniconda3\python.exe`.
   Conda is at `C:\ProgramData\Miniconda3\Scripts\conda.exe`.
+- **Quarto on this machine:** RStudio-bundled Quarto at `C:\Program Files\RStudio\resources\app\bin\quarto\bin\quarto.exe`. Use this absolute path if `quarto` is not on `PATH`; prefer `quarto.exe` over `quarto.cmd`.
 - **Pin Stata version** at top of every do-file: `version 15`
 - **Required user-written commands:** `reghdfe`, `ftools`, `estout`, `ivreg2`, `boottest`. See `templates/master-do-template.do` for `ssc install` recipe.
 - **Per-do-file logging:** `capture log close` then `log using logs/<name>.log, replace text`
@@ -98,6 +102,11 @@ python scripts/quality_score.py dofiles/03_analysis/main_regression.do
 - **Cluster SEs** at the most aggregate plausible level by default; document the choice
 - **No root logs** — move Stata console transcripts into the relevant project or exploration `logs/` folder
 - **Stata comment pitfall** — avoid paths like `output/tables/*` in `.do` comments because `/*` starts a block comment
+
+### Reporting and Figure Defaults
+
+- **Reports:** For substantive analysis reports, create English and Chinese Quarto versions by default, for example `analysis_report.qmd` and `analysis_report_zh.qmd`, and render both to HTML when Quarto is available.
+- **Figures:** Follow the muted Stata-style graph standard in `AGENTS.md`. For survival curves, mirror `explorations/cox_hazard_ratio_simulation/dofiles/07_cox_hazard_ratio.do`: white graph/plot regions, focal series RGB `"49 145 255"`, comparison series RGB `"142 164 184"`, title RGB `"31 55 73"`, secondary text RGB `"74 89 105"`, subtle `gs14` horizontal gridlines, horizontal white legend, and PDF plus PNG export.
 
 ---
 

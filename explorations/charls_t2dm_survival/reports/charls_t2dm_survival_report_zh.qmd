@@ -1,0 +1,64 @@
+---
+title: "CHARLS 糖尿病生存分析"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+execute:
+  echo: false
+---
+
+# 摘要
+
+本报告基于用户提供的 CHARLS 分析数据，评估孤独、社会隔离与 2 型糖尿病发病风险之间的关联。下文所有数值均来自 `explorations/charls_t2dm_survival/output/tables/` 或 `explorations/charls_t2dm_survival/logs/01_charls_t2dm_survival.log`。
+
+分析样本包括 14,205 名研究对象和 1,295 例新发 2 型糖尿病事件；平均随访时间为 5.83 年，中位随访时间为 7.00 年。孤独的患病率为 29.49%，社会隔离的患病率为 13.58%。来源：`output/tables/sample_summary.csv`。
+
+# 主要 Cox 模型
+
+逐步调整 Cox 模型显示，孤独在所有调整模型中均与新发 2 型糖尿病风险升高相关。在完全调整模型中，孤独对应的风险比为 1.204，95% 置信区间为 1.074 至 1.350，p = 0.0014。社会隔离在完全调整模型中未达到统计显著性，风险比为 1.115，95% 置信区间为 0.944 至 1.316，p = 0.1990。来源：`output/tables/cox_models.csv`。
+
+在同时纳入孤独和社会隔离的完全调整模型中，孤独仍与更高的 2 型糖尿病风险相关，风险比为 1.196，95% 置信区间为 1.066 至 1.342，p = 0.0023；社会隔离仍未达到统计显著性，风险比为 1.079，95% 置信区间为 0.913 至 1.275，p = 0.3747。来源：`output/tables/cox_models.csv`。
+
+# 稳健性与分性别分析
+
+完全调整模型中，连续社会隔离得分与新发 2 型糖尿病风险无显著关联，风险比为 1.009，95% 置信区间为 0.936 至 1.086，p = 0.8198。组合二分类指标显示，存在孤独或社会隔离任一风险者的风险比为 1.166，95% 置信区间为 1.043 至 1.303，p = 0.0071；同时存在孤独和社会隔离者的风险比为 1.308，95% 置信区间为 1.064 至 1.608，p = 0.0108。Weibull 生存模型给出的孤独估计与主模型相近，风险比为 1.210，95% 置信区间为 1.075 至 1.361，p = 0.0016；社会隔离的 Weibull 模型风险比为 1.115，95% 置信区间为 0.940 至 1.323，p = 0.2124。来源：`output/tables/cox_models.csv`。
+
+分性别完全调整模型提示，孤独与 2 型糖尿病风险之间的关联在女性中更强，风险比为 1.287，95% 置信区间为 1.115 至 1.485，p = 0.0006；在男性中未达到统计显著性，风险比为 1.075，95% 置信区间为 0.884 至 1.306，p = 0.4698。该结果为亚组估计，并非正式交互作用检验。来源：`output/tables/cox_models.csv`。
+
+# 比例风险假设诊断
+
+Schoenfeld 残差检验未拒绝主要暴露变量的比例风险假设。完全调整孤独模型中，孤独变量的检验 p = 0.9925，全局检验 p = 0.0914；完全调整社会隔离模型中，社会隔离变量的检验 p = 0.4626，全局检验 p = 0.0792；联合模型的全局检验 p = 0.1096。来源：`logs/01_charls_t2dm_survival.log` 中 “PH test” 输出块。
+
+# 图形
+
+![](../output/figures/km_t2dm_lonely.png)
+
+![](../output/figures/km_t2dm_isolated.png)
+
+# 可写入手稿的方法部分
+
+本研究使用用户提供的 CHARLS 分析队列开展生存分析，以评估孤独和社会隔离与新发 2 型糖尿病之间的关联。随访时间由 `time_t2dm` 定义，新发 2 型糖尿病事件由 `event_t2dm` 定义。我们以 `panel_ID` 为个体标识设定生存数据，每名研究对象一条记录，随访至 2 型糖尿病发生或删失。
+
+主要暴露为孤独和社会隔离两个二分类指标。为检验结果稳健性，我们进一步使用连续社会隔离得分、三分类社会隔离得分（0、1、2-4）、孤独或社会隔离任一风险指标，以及孤独和社会隔离同时存在指标。协变量采用逐步增加的方式纳入模型，以评估不同调整集合下估计结果的稳定性。模型 1 调整年龄和性别；模型 2 在模型 1 基础上进一步调整汉族身份、教育类别和家庭收入对数；模型 3 在模型 2 基础上进一步调整总 MET 加 1 后的对数和体质指数；模型 4 在模型 3 基础上进一步调整基线高血压、心脏病、血脂异常和卒中。由于 `rural_r`、`employed`、`smoke_cur` 和 `drink_cur` 在当前分析文件中没有变异，模型无法识别其系数，因此仅在日志中记录并未纳入调整模型。
+
+我们采用 Cox 比例风险模型并使用稳健标准误，报告风险比、95% 置信区间和双侧 p 值。主要分析分别估计孤独和社会隔离在逐步协变量调整模型中的关联；联合模型同时纳入孤独和社会隔离。稳健性分析包括替代暴露定义和 Weibull 生存模型。我们还按性别分别估计完全调整模型，以考察亚组关联。比例风险假设采用 Schoenfeld 残差检验（`estat phtest, detail`）进行评估。按孤独和社会隔离分组的累计发生率曲线采用 Kaplan-Meier 方法估计，并导出为 PDF 和 PNG 图形。
+
+# 可重复性
+
+运行命令：
+
+```bash
+"C:\Program Files (x86)\Stata15\Stata-64.exe" /e do explorations/charls_t2dm_survival/dofiles/01_charls_t2dm_survival.do
+```
+
+主要输出文件：
+
+- `explorations/charls_t2dm_survival/logs/01_charls_t2dm_survival.log`
+- `explorations/charls_t2dm_survival/output/tables/sample_summary.csv`
+- `explorations/charls_t2dm_survival/output/tables/baseline_characteristics.csv`
+- `explorations/charls_t2dm_survival/output/tables/cox_models.csv`
+- `explorations/charls_t2dm_survival/output/figures/km_t2dm_lonely.pdf`
+- `explorations/charls_t2dm_survival/output/figures/km_t2dm_lonely.png`
+- `explorations/charls_t2dm_survival/output/figures/km_t2dm_isolated.pdf`
+- `explorations/charls_t2dm_survival/output/figures/km_t2dm_isolated.png`

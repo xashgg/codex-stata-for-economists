@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>CHARLS T2DM Survival Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="charls_t2dm_survival_report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="charls_t2dm_survival_report_files/libs/quarto-html/quarto.js"></script>
+<script src="charls_t2dm_survival_report_files/libs/quarto-html/popper.min.js"></script>
+<script src="charls_t2dm_survival_report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="charls_t2dm_survival_report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="charls_t2dm_survival_report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="charls_t2dm_survival_report_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="charls_t2dm_survival_report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="charls_t2dm_survival_report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="charls_t2dm_survival_report_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#summary" id="toc-summary" class="nav-link active" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#main-cox-models" id="toc-main-cox-models" class="nav-link" data-scroll-target="#main-cox-models">Main Cox Models</a></li>
+  <li><a href="#robustness-and-sex-stratified-analyses" id="toc-robustness-and-sex-stratified-analyses" class="nav-link" data-scroll-target="#robustness-and-sex-stratified-analyses">Robustness and Sex-Stratified Analyses</a></li>
+  <li><a href="#proportional-hazards-diagnostics" id="toc-proportional-hazards-diagnostics" class="nav-link" data-scroll-target="#proportional-hazards-diagnostics">Proportional Hazards Diagnostics</a></li>
+  <li><a href="#figures" id="toc-figures" class="nav-link" data-scroll-target="#figures">Figures</a></li>
+  <li><a href="#manuscript-methods" id="toc-manuscript-methods" class="nav-link" data-scroll-target="#manuscript-methods">Manuscript Methods</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">CHARLS T2DM Survival Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="summary" class="level1">
+<h1>Summary</h1>
+<p>This report summarizes a reproducible survival analysis of loneliness, social isolation, and incident type 2 diabetes in the supplied CHARLS analytic dataset. All numerical statements below are backed by <code>explorations/charls_t2dm_survival/output/tables/</code> or <code>explorations/charls_t2dm_survival/logs/01_charls_t2dm_survival.log</code>.</p>
+<p>The analytic sample includes 14,205 participants and 1,295 incident T2DM events, with a mean follow-up of 5.83 years and median follow-up of 7.00 years. Loneliness prevalence is 29.49%, and social isolation prevalence is 13.58%. Source: <code>output/tables/sample_summary.csv</code>.</p>
+</section>
+<section id="main-cox-models" class="level1">
+<h1>Main Cox Models</h1>
+<p>The staged Cox models show that loneliness is positively associated with incident T2DM across all adjustment sets. In the fully adjusted model, the hazard ratio for loneliness is 1.204 (95% CI 1.074 to 1.350; p = 0.0014). Social isolation is not statistically significant in the fully adjusted model (HR 1.115; 95% CI 0.944 to 1.316; p = 0.1990). Source: <code>output/tables/cox_models.csv</code>.</p>
+<p>In the mutually adjusted fully adjusted model, loneliness remains associated with higher T2DM hazard (HR 1.196; 95% CI 1.066 to 1.342; p = 0.0023), while social isolation does not (HR 1.079; 95% CI 0.913 to 1.275; p = 0.3747). Source: <code>output/tables/cox_models.csv</code>.</p>
+</section>
+<section id="robustness-and-sex-stratified-analyses" class="level1">
+<h1>Robustness and Sex-Stratified Analyses</h1>
+<p>The continuous social isolation score is not associated with incident T2DM in the fully adjusted model (HR 1.009; 95% CI 0.936 to 1.086; p = 0.8198). The combined binary indicators show higher hazards for having either loneliness or social isolation (HR 1.166; 95% CI 1.043 to 1.303; p = 0.0071) and for having both (HR 1.308; 95% CI 1.064 to 1.608; p = 0.0108). Weibull models yield similar estimates for loneliness (HR 1.210; 95% CI 1.075 to 1.361; p = 0.0016) and social isolation (HR 1.115; 95% CI 0.940 to 1.323; p = 0.2124). Source: <code>output/tables/cox_models.csv</code>.</p>
+<p>Sex-stratified fully adjusted models suggest a stronger loneliness association among women (HR 1.287; 95% CI 1.115 to 1.485; p = 0.0006) than among men (HR 1.075; 95% CI 0.884 to 1.306; p = 0.4698). These are subgroup associations, not a formal interaction test. Source: <code>output/tables/cox_models.csv</code>.</p>
+</section>
+<section id="proportional-hazards-diagnostics" class="level1">
+<h1>Proportional Hazards Diagnostics</h1>
+<p>Schoenfeld residual tests do not reject the proportional hazards assumption for the main exposure terms. The fully adjusted loneliness model has exposure-specific p = 0.9925 and global p = 0.0914; the fully adjusted social isolation model has exposure-specific p = 0.4626 and global p = 0.0792; the joint model has global p = 0.1096. Source: <code>logs/01_charls_t2dm_survival.log</code>, lines around the printed “PH test” blocks.</p>
+</section>
+<section id="figures" class="level1">
+<h1>Figures</h1>
+<p><img src="../output/figures/km_t2dm_lonely.png" class="img-fluid"></p>
+<p><img src="../output/figures/km_t2dm_isolated.png" class="img-fluid"></p>
+</section>
+<section id="manuscript-methods" class="level1">
+<h1>Manuscript Methods</h1>
+<p>We conducted a time-to-event analysis using the supplied CHARLS analytic cohort to estimate associations of loneliness and social isolation with incident type 2 diabetes mellitus (T2DM). Follow-up time was defined by <code>time_t2dm</code>, and incident T2DM was defined by <code>event_t2dm</code>. Participants were stset with one record per <code>panel_ID</code>, and survival time was modeled from baseline until T2DM onset or censoring.</p>
+<p>The primary exposures were binary indicators for loneliness and social isolation. Additional exposure specifications included the continuous social isolation score, a three-level social isolation score category (0, 1, and 2-4), an indicator for either loneliness or social isolation, and an indicator for both loneliness and social isolation. Covariates were added sequentially to evaluate robustness across adjustment sets. Model 1 adjusted for age and sex. Model 2 additionally adjusted for Han ethnicity, education category, and log household income. Model 3 additionally adjusted for log-transformed total metabolic equivalent task minutes and body mass index. Model 4 additionally adjusted for baseline hypertension, heart disease, dyslipidemia, and stroke. Variables with no variation in the analytic file (<code>rural_r</code>, <code>employed</code>, <code>smoke_cur</code>, and <code>drink_cur</code>) were documented but excluded from adjusted models because their coefficients are not identifiable.</p>
+<p>We estimated Cox proportional hazards models with robust standard errors and reported hazard ratios with 95% confidence intervals and two-sided p-values. Primary analyses estimated loneliness and social isolation separately across the staged covariate sets; a mutually adjusted model included both exposures simultaneously. Prespecified robustness analyses used alternative exposure definitions and Weibull survival models. We further conducted sex-stratified analyses by estimating fully adjusted models separately for women and men. The proportional hazards assumption was evaluated using Schoenfeld residual tests (<code>estat phtest, detail</code>). Cumulative incidence curves by loneliness and social isolation were estimated using Kaplan-Meier methods and exported as publication-ready PDF and PNG figures.</p>
+</section>
+<section id="reproducibility" class="level1">
+<h1>Reproducibility</h1>
+<p>Run:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="st">"C:\Program Files (x86)\Stata15\Stata-64.exe"</span> /e do explorations/charls_t2dm_survival/dofiles/01_charls_t2dm_survival.do</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Generated artifacts:</p>
+<ul>
+<li><code>explorations/charls_t2dm_survival/logs/01_charls_t2dm_survival.log</code></li>
+<li><code>explorations/charls_t2dm_survival/output/tables/sample_summary.csv</code></li>
+<li><code>explorations/charls_t2dm_survival/output/tables/baseline_characteristics.csv</code></li>
+<li><code>explorations/charls_t2dm_survival/output/tables/cox_models.csv</code></li>
+<li><code>explorations/charls_t2dm_survival/output/figures/km_t2dm_lonely.pdf</code></li>
+<li><code>explorations/charls_t2dm_survival/output/figures/km_t2dm_lonely.png</code></li>
+<li><code>explorations/charls_t2dm_survival/output/figures/km_t2dm_isolated.pdf</code></li>
+<li><code>explorations/charls_t2dm_survival/output/figures/km_t2dm_isolated.png</code></li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

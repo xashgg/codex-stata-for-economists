@@ -48,6 +48,7 @@ This repository is a Stata empirical-research workflow template. Codex should pr
 - Every substantive `.do` file should have `version`, `set more off`, `set varabbrev off`, logging, and a clear header.
 - Write new or modified Stata do-file comments in Chinese unless the user requests another language.
 - Keep reports downstream of pipeline outputs. Reports should consume `output/`, not become the primary analysis source.
+- For substantive analysis reports, generate both English and Chinese Quarto reports by default unless the user asks for only one language. Use parallel filenames such as `analysis_report.qmd` and `analysis_report_zh.qmd`, and render both to HTML when Quarto is available.
 - Do not edit protected files casually: `dofiles/00_master.do`, `.gitignore`, and bibliography files if added later.
 - Do not put wildcard paths such as `output/tables/*` inside Stata block comments or header comments. Stata reads `/*` as the start of a block comment even when it appears inside a path, which can silently comment out the rest of a do-file. Prefer `output/tables/` in `.do` file headers.
 
@@ -70,6 +71,14 @@ Render the report:
 ```bash
 quarto render reports/analysis_report.qmd
 ```
+
+If `quarto` is not on `PATH`, use the RStudio-bundled Quarto executable:
+
+```powershell
+& 'C:\Program Files\RStudio\resources\app\bin\quarto\bin\quarto.exe' render reports\analysis_report.qmd
+```
+
+On this Windows setup, prefer `quarto.exe` over `quarto.cmd` when using the RStudio-bundled path because the `.cmd` wrapper can misparse paths under `C:\Program Files\...`.
 
 Score an artifact:
 
@@ -98,7 +107,7 @@ python scripts/check_data_safety.py --staged $(git diff --cached --name-only)
 - Export figures with native Stata `graph export` as both `.pdf` and `.png`; do not keep `.gph` as a committed artifact.
 - When generating a figure, always create both PDF and PNG outputs unless Stata itself cannot run.
 - Use a muted Stata-style graph design by default: white or very light gray background, subtle horizontal gridlines only, solid blue marks or bars using RGB `"49 145 255"` / HEX `#3191FF`, no glossy or gradient-like effects, no strong contrast edges, Arial or default Stata Sans fonts, normal-weight dark blue-gray titles, modest axis/tick label sizes, and Stata-default-like proportions with enough whitespace.
-- For survival curves, use the same graph style: white background, subtle horizontal gridlines, treatment or focal series in RGB `"49 145 255"` / HEX `#3191FF`, comparison series in muted blue-gray, restrained titles, and PDF plus PNG export. In Stata 15, `stcurve` has limited line-style options; use `sts graph, by(...)` when reliable per-line styling is needed.
+- For survival curves, use the same graph style and follow the reference in `explorations/cox_hazard_ratio_simulation/dofiles/07_cox_hazard_ratio.do`: white `graphregion()` and `plotregion()`, restrained title color RGB `"31 55 73"`, subtitle/secondary text RGB `"74 89 105"`, focal or exposed series in RGB `"49 145 255"` / HEX `#3191FF` with solid medium-thick line, comparison series in muted blue-gray RGB `"142 164 184"` with dashed medium-thin line, subtle horizontal gridlines `glcolor(gs14) glwidth(vthin)`, horizontal white legend, small axis labels, and PNG width around 1800. In Stata 15, `stcurve` has limited line-style options; use `sts graph, by(...)` when reliable per-line styling is needed.
 - Prefer `esttab` outputs as `.tex` plus `.csv` for auditability.
 - Cluster standard errors at the most defensible aggregate level and document the choice.
 - For large CSV workflows, do not assume Stata can reliably import only selected columns across versions. If the source is too wide or slow, use a small reproducible Miniconda Python helper to stream selected columns into `data/derived/`, then have Stata read the narrow extract.
@@ -114,7 +123,9 @@ python scripts/check_data_safety.py --staged $(git diff --cached --name-only)
 - Conda executable: `C:\ProgramData\Miniconda3\Scripts\conda.exe`.
 - Python executable: `C:\ProgramData\Miniconda3\python.exe`.
 - Stata executable: `C:\Program Files (x86)\Stata15\Stata-64.exe`.
-- Prefer explicit executable paths if `python`, `conda`, or `stata` are not found on `PATH`.
+- RStudio-bundled Quarto executable: `C:\Program Files\RStudio\resources\app\bin\quarto\bin\quarto.exe`.
+- Prefer explicit executable paths if `python`, `conda`, `stata`, or `quarto` are not found on `PATH`.
+- Prefer the explicit `quarto.exe` path over the RStudio-bundled `quarto.cmd` on Windows.
 
 ## Log Verification
 

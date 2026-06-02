@@ -78,7 +78,7 @@ esttab m_main using "output/tables/main_regression.csv", replace ///
 
 ```stata
 graph export "output/figures/event_study.pdf", replace
-graph export "output/figures/event_study.png", replace width(1600)
+graph export "output/figures/event_study.png", replace width(1800)
 ```
 
 Set scheme once at the top of a figure-producing do-file:
@@ -86,6 +86,18 @@ Set scheme once at the top of a figure-producing do-file:
 ```stata
 set scheme s2color   // or your project's installed scheme
 ```
+
+Use the project graph style unless the user requests a different journal style:
+
+- White `graphregion()` and `plotregion()` with no visible border.
+- Title text in RGB `"31 55 73"` and secondary text in RGB `"74 89 105"`.
+- Focal or exposed series in RGB `"49 145 255"` / HEX `#3191FF`, solid and medium-thick.
+- Comparison series in muted blue-gray RGB `"142 164 184"`, dashed and medium-thin.
+- Subtle horizontal gridlines only: `glcolor(gs14) glwidth(vthin)`.
+- Small axis labels, horizontal labels where practical, and a white legend region.
+- Export both PDF and PNG, with PNG width around 1800.
+
+For survival curves, mirror `explorations/cox_hazard_ratio_simulation/dofiles/07_cox_hazard_ratio.do`. In Stata 15, prefer `sts graph, by(...)` when per-line styling is needed, because `stcurve` has limited line-style options.
 
 ## 7. Comment Quality
 
