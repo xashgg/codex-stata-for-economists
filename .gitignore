@@ -134,3 +134,19 @@ desktop.ini
 .env.local
 *.key
 *.pem
+
+# ------------------------------------------------------------------------------
+# Exploration projects
+# ------------------------------------------------------------------------------
+# Ignore new top-level exploration projects by default. Add an explicit exception
+# here only when a project is intentionally approved for version control.
+/explorations/*/
+!/explorations/ARCHIVE/
+!/explorations/charls_t2dm_survival/
+!/explorations/chns_height_premium/
+!/explorations/cox_hazard_ratio_simulation/
+!/explorations/educwages_tutorial/
+!/explorations/hsb2_teaching_demo/
+!/explorations/mroz_tutorial/
+!/explorations/staggered_did_simulation/
+!/explorations/sugar_uk_social_class/
