@@ -1,3 +1,21 @@
+## 本 Fork 的修改说明
+
+本仓库是在原有 Stata 实证研究模板基础上的个人维护版本，主要改动包括：
+
+- 将工作流调整为 **Codex 优先、Claude Code 兼容**，以 `AGENTS.md` 作为 Codex 的主要项目规则入口，同时保留 `CLAUDE.md` 和 `.claude/` 作为兼容配置与扩展参考。
+- 补充从 exploration 到 production 的完整生命周期，包括项目目录结构、do-file 编排原则、调试与定稿提示词模板、迁移审计以及接入 `dofiles/00_master.do` 的条件。
+- 引入双重 Stata 执行模式：exploration 阶段默认使用 `stata-mcp` 进行有状态的交互检查和单行调试，稳定后使用独立 Stata 批处理进程进行可复现验证。
+- 强化日志核验、数据保护、结果追踪和质量门槛，要求数值结论能够追溯到最新日志或输出表格。
+- 整理 Windows 环境下的 Stata、Python、Quarto 和 `stata-mcp` 使用说明，并统一现有 exploration 的日志与输出目录约定。
+- 调整 exploration 的版本控制策略：现有示例项目按白名单管理，新建的项目目录默认保持为本地工作区内容，只有在明确决定公开时才纳入 Git。
+
+### 来源说明
+
+原仓库中保留的 `.claude/` 目录可能参考或来源于
+[pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow)。该来源关系尚未通过当前仓库的文件历史得到完整确认，因此这里仅作可能来源说明；相关文件的具体许可与署名应以其原始仓库为准。
+
+---
+
 <p align="center">
   <a href="https://doi.org/10.5281/zenodo.19902598">
     <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.19902598.svg" alt="DOI">
