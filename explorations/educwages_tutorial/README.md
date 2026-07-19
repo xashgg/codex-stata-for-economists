@@ -34,11 +34,11 @@ From the project root:
 bash scripts/run_stata.sh explorations/educwages_tutorial/dofiles/01_tutorial.do
 ```
 
-If Stata is not on your `PATH` (Chen's machine: Stata 15 lives at
-`C:\Program Files (x86)\Stata15\`), add it first for this session:
+If Stata is not on your `PATH` (this machine uses Stata 18 MP under
+`D:\Stata18\`), add it first for this session:
 
 ```bash
-export PATH="/c/Program Files (x86)/Stata15:$PATH"
+export PATH="/d/Stata18:$PATH"
 ```
 
 Or, from inside an interactive Stata session:
@@ -53,11 +53,11 @@ After a successful run:
 
 | Path | What it contains |
 |---|---|
-| `logs/01_tutorial.log` | Full session transcript: every command, every number |
-| `output/figures/edu_histogram.pdf` (and `.png`) | Histogram of education years |
-| `output/figures/edu_wage_scatter.pdf` (and `.png`) | Scatter of education vs wages with linear fit |
-| `output/tables/summary_stats.csv` | `summarize` output for the analysis sample |
-| `output/tables/ols_vs_iv.csv` (and `.rtf`) | Side-by-side OLS and IV regression of wages on education |
+| `explorations/educwages_tutorial/logs/01_tutorial.log` | Full session transcript: every command, every number |
+| `explorations/educwages_tutorial/output/figures/edu_histogram.pdf` (and `.png`) | Histogram of education years |
+| `explorations/educwages_tutorial/output/figures/edu_wage_scatter.pdf` (and `.png`) | Scatter of education vs wages with linear fit |
+| `explorations/educwages_tutorial/output/tables/summary_stats.csv` | `summarize` output for the analysis sample |
+| `explorations/educwages_tutorial/output/tables/ols_vs_iv.csv` (and `.rtf`) | Side-by-side OLS and IV regression of wages on education |
 
 Every coefficient, standard error, and first-stage F statistic appears
 verbatim in `logs/01_tutorial.log`.

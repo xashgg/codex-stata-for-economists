@@ -7,7 +7,7 @@ This exploration estimates associations between loneliness, social isolation, an
 ## Run
 
 ```bash
-"C:\Program Files (x86)\Stata15\Stata-64.exe" /e do explorations/charls_t2dm_survival/dofiles/01_charls_t2dm_survival.do
+"D:\Stata18\StataMP-64.exe" /e do explorations/charls_t2dm_survival/dofiles/01_charls_t2dm_survival.do
 ```
 
 The script is self-contained and writes logs inside `explorations/charls_t2dm_survival/logs/`.

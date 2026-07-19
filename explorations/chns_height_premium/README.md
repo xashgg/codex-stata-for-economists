@@ -6,7 +6,7 @@ cross-section selected by complete OLS sample size.
 Run from the project root:
 
 ```bash
-C:\ProgramData\Miniconda3\python.exe explorations\chns_height_premium\scripts\build_height_core.py
+D:\anaconda3\python.exe explorations\chns_height_premium\scripts\build_height_core.py
 bash scripts/run_stata.sh explorations/chns_height_premium/dofiles/01_height_premium.do
 ```
 

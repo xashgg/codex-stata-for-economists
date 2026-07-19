@@ -16,7 +16,8 @@ set more off
 set varabbrev off
 
 capture log close
-log using "logs/mroz_tutorial_01_mroz_analysis.log", replace text
+capture mkdir "explorations/mroz_tutorial/logs"
+log using "explorations/mroz_tutorial/logs/01_mroz_analysis.log", replace text
 
 *------------------------------------------------------------------------------
 * 第 0 步：创建输出文件夹

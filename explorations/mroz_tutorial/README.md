@@ -8,10 +8,10 @@
 bash scripts/run_stata.sh explorations/mroz_tutorial/dofiles/01_mroz_analysis.do
 ```
 
-或在 Windows PowerShell 中直接使用本机 Stata 15：
+或在 Windows PowerShell 中直接使用本机 Stata 18 MP：
 
 ```powershell
-& 'C:\Program Files (x86)\Stata15\Stata-64.exe' /b do 'explorations\mroz_tutorial\dofiles\01_mroz_analysis.do'
+& 'D:\Stata18\StataMP-64.exe' /b do 'explorations\mroz_tutorial\dofiles\01_mroz_analysis.do'
 ```
 
 主要输出：
@@ -24,4 +24,4 @@ bash scripts/run_stata.sh explorations/mroz_tutorial/dofiles/01_mroz_analysis.do
 - `explorations/mroz_tutorial/output/figures/mroz_faminc_histogram.png`
 - `explorations/mroz_tutorial/output/figures/mroz_wage_educ_scatter.pdf`
 - `explorations/mroz_tutorial/output/figures/mroz_wage_educ_scatter.png`
-- `logs/mroz_tutorial_01_mroz_analysis.log`
+- `explorations/mroz_tutorial/logs/01_mroz_analysis.log`
