@@ -19,7 +19,7 @@
 
 **作者：** 朱 晨 | 遗传社科研究 Chen Zhu | China Agricultural University (CAU)
 
-**最后更新：** 2026-06-02
+**最后更新：** 2026-07-19
 
 **致谢：** [@shy7890](https://github.com/shy7890)（bug修复）
 
@@ -96,6 +96,117 @@ codex
 
 **如果 Codex 中途困在寻找 Python 和 Stata：** 按 Esc 暂停，并告诉 Codex 你的 Python 和 Stata 版本及所在位置。
 
+> **工作流说明：** 上面的单文件 Prompt 适合快速教学演示。对于尚未定稿的真实研究，
+> 应优先使用下面的 exploration workflow，不要直接把测试代码写入生产 `dofiles/`
+> 或把测试结果写入根 `output/`。
+
+### 推荐使用流程与提示词模板
+
+一个研究项目通常经历“启动探索—迭代调试—稳定重构—晋升审计—正式迁移”五个阶段。
+提示词不需要逐条指定 Stata 命令放在哪个 `.do` 文件；你可以先说明研究问题、数据和
+分析目标，要求 Codex 提出文件编排方案。样本筛选、变量含义、模型设定、固定效应和
+标准误聚类层级等实质选择应由 Codex 明确说明，不能静默替你决定。
+
+#### 1. 启动 exploration
+
+```text
+请阅读 AGENTS.md 和 README.md。新建 exploration：<项目名>。
+数据位于 <数据路径>，研究问题是 <研究问题>，计划进行 <分析内容>。
+请先检查数据，并提出 do-file 的用途、输入、输出和执行顺序，再开始实施。
+建立 README.md、dofiles/、logs/、output/tables/ 和 output/figures/。
+所有测试日志和结果保存在该 exploration 内，不要修改生产 dofiles/00_master.do。
+```
+
+#### 2. 只调试当前问题
+
+```text
+请只在 explorations/<项目名>/ 中调试 <具体问题或模型>。
+单行检查和迭代调试默认使用 stata-mcp；需要文件级测试时，只运行解决该问题所需的 do-file。
+不要运行完整生产 pipeline，也不要修改生产文件。
+检查最新日志和输出表格后再解释数值结果。
+```
+
+在 exploration 阶段，Codex 默认用 `stata-mcp` 直接执行单行检查、查看当前数据和
+迭代调试，不会仅为执行一行命令而新建临时 `.do` 文件。确认有效的分析命令仍须写回
+exploration 内的正式 `.do` 文件。MCP 会话带有当前数据、宏、筛选和估计结果等状态，
+因此只用于快速诊断，未保存的交互式输出不能作为最终数值依据。
+
+当 exploration 的 `.do` 文件稳定后，应通过仓库批处理命令在全新的 Stata 进程中运行
+该独立文件，以验证它不依赖 MCP 会话状态。晋升生产及最终验证继续使用批处理，并在
+适用时完整运行 `dofiles/00_master.do`。MCP 与批处理不得同时写入同一日志、数据文件、
+表格或图形。如果当前 Codex 会话没有加载 `stata-mcp`，Codex 应明确说明，不能在未告知
+用户的情况下改用 CMD、批处理或临时 `.do` 文件。
+
+##### 如何获得接近 Stata GUI 的手动体验
+
+stata-mcp 项目主页：<https://github.com/hanlulong/stata-mcp/tree/main>
+
+`stata-mcp` 不要求用户预先打开传统的 Stata Desktop 窗口。安装扩展并打开 VS Code
+后，扩展默认自动启动本地 MCP 服务；状态栏显示 `Stata` 表示服务已经启动。用户可以
+在 VS Code 内完成接近 Stata Command、Results、Data Editor 和 Graph 窗口的交互操作：
+
+1. 打开一个 `.do` 文件，把光标放在需要执行的行，或选中一段 Stata 代码。
+2. 按 `Ctrl+Shift+Enter`，或点击编辑器工具栏的运行按钮，执行当前行或选中代码。
+3. 在 **Stata Output** 面板查看命令和结果；使用命令面板中的
+   **Stata: Show Output** 可以重新打开该面板。
+4. 使用 **Stata: Interactive Mode** 打开交互窗口，像在 Stata Command 窗口中一样
+   逐条输入命令。当前数据、宏、程序和估计结果会在同一会话中继续保留。
+5. 使用 **Stata: View Data** 以表格形式查看当前内存数据，并可输入 Stata `if`
+   条件筛选显示的观测。
+6. Stata 命令生成图形后，图形默认显示在 VS Code 面板中；也可以在扩展设置中把
+   `stata-vscode.graphDisplayMethod` 改为 `browser`，使用外部浏览器显示。
+7. 需要清空状态并重新开始时，在命令面板运行 **Stata: Restart Session**。这会清除
+   内存数据、globals 和 programs，效果相当于关闭后重新打开一个 Stata 会话。
+
+运行整个当前 `.do` 文件可按 `Ctrl+Shift+D`，停止正在执行的命令可按
+`Ctrl+Shift+C`。如果编辑器工具栏没有显示相关按钮，可以按 `Ctrl+Shift+P` 打开命令
+面板，搜索以 `Stata:` 开头的命令。详细操作与最新快捷键以
+[stata-mcp 官方 README](https://github.com/hanlulong/stata-mcp/tree/main#usage) 为准。
+
+VS Code 中手动运行的会话、Codex 通过 MCP 调用的会话，以及用户另外打开的传统 Stata
+GUI 窗口可能是相互独立的。启用多会话模式时，不应假设它们自动共享数据、宏或估计
+结果。为使 VS Code 中手动运行当前行或选中代码后，Codex 可以继续使用相同的内存
+状态，本项目规定 Codex 默认显式使用 `session_id="default"`。只有用户明确要求隔离或
+并行执行时，Codex 才能创建命名会话，并须向用户说明该会话 ID。
+
+运行 **Stata: Restart Session** 会重启并清空 `default` 会话中的数据、宏、程序和估计
+结果，但不会自动销毁已经创建的其他命名会话。用户另外打开的传统 Stata GUI 窗口仍
+是独立进程，不与 MCP 的 `default` 会话共享内存状态。
+
+#### 3. exploration 变复杂后再考虑拆分
+
+```text
+当前 exploration 已经较复杂。请先提出 do-file 拆分建议，说明每个文件的职责、
+输入、输出和依赖顺序，暂不修改文件。拆分必须保持现有样本、模型和结果不变。
+如确有必要，可建议增加 exploration 内部的 dofiles/00_run_all.do。
+```
+
+仓库没有规定一个模型或一类命令必须单独占用一个 `.do` 文件。单文件 exploration
+完全合规；是否拆分取决于运行时间、依赖关系、局部重跑需要和可读性。
+`00_run_all.do` 也是可选的，只用于协调同一 exploration 内的多个文件，不能代替生产
+`dofiles/00_master.do`。
+
+#### 4. 定稿前进行晋升审计
+
+```text
+请对 explorations/<项目名>/ 做 production promotion audit，暂不迁移。
+检查：数据和变量定义、样本限制、模型设定、日志错误、结果可追溯性、输出格式、
+数据安全、README 复现说明和质量评分。列出尚未达到生产要求的项目。
+```
+
+#### 5. 明确授权晋升生产
+
+```text
+explorations/<项目名>/ 已经定稿，请晋升到生产 pipeline。
+将代码按职责迁移到 dofiles/01_clean/、02_construct/、03_analysis/ 和 04_output/，
+把日志和结果路径改为根 logs/ 与 output/，并按依赖顺序接入 dofiles/00_master.do。
+不要改变未经授权的样本或模型设定。分别运行迁移后的单个文件和完整 pipeline，
+比较迁移前后的样本量、核心系数和输出，说明所有差异。
+```
+
+只有第5类提示词明确授权修改生产 `dofiles/00_master.do`。仅说“试一下”“调试”或
+“增加一个模型”时，代码应继续留在 exploration 中。
+
 ---
 
 ## 这个仓库做什么
@@ -166,7 +277,7 @@ Claude Code 兼容文件仍然存在：
 | 可复现 | do-file 固定 Stata `version`，统一随机种子，使用相对路径，流水线从 `00_master.do` 启动 |
 | 日志验证 | 数值结论必须来自 Stata log 或输出表格；无日志则不报告结果 |
 | 数据保护 | `.gitignore` 阻止 raw/derived 数据、Stata 日志和数据文件误提交 |
-| 发表级输出 | 表格通过 `esttab` 等工具输出，图形通过 Stata 原生 `graph export` 同时输出 `.pdf` 和 `.png` |
+| 发表级输出 | 表格和图形使用可审计、可复现的项目标准；描述统计与回归表的具体格式以 `.claude/skills/build-tables/SKILL.md` 为准，图形由 Stata 原生导出为 PDF 和 PNG |
 
 ---
 
@@ -219,7 +330,7 @@ bash scripts/run_stata.sh dofiles/03_analysis/main_regression.do
 运行 CHNS 身高溢价探索示例：
 
 ```bash
-C:\ProgramData\Miniconda3\python.exe explorations\chns_height_premium\scripts\build_height_core.py
+D:\anaconda3\python.exe explorations\chns_height_premium\scripts\build_height_core.py
 bash scripts/run_stata.sh explorations/chns_height_premium/dofiles/01_height_premium.do
 ```
 
@@ -278,7 +389,7 @@ python scripts/quality_score.py scripts/check_data_safety.py
 - 涉及随机过程时设置随机种子。
 - 回归结果如果要进入表格，应使用 `estimates store` 或 `est store` 保存。
 - 图形必须由 Stata 原生导出为 `.pdf` 和 `.png` 两种格式，不要用 SVG 转换替代。
-- 图形默认采用 Stata 风格：白色或极浅灰背景、浅灰细横向网格线、`#3191FF` / RGB `"49 145 255"` 蓝色、Arial 或 Stata Sans 字体、标题正常字重且不过大、整体留白充足。
+- 图形使用一致、克制且适合论文展示的 Stata 风格；需要复用具体样式时参考已有示例。
 - 新增或修改的 Stata 注释默认使用中文。
 
 ---
@@ -383,14 +494,14 @@ python scripts/quality_score.py scripts/check_data_safety.py
 | Codex | 代码与文档维护、Stata 工作流协助 |
 | Claude Code | 可选兼容工具 |
 | Stata | 运行 do-file |
-| Python 3 | Miniconda，`C:\ProgramData\Miniconda3\python.exe`，用于数据安全检查和质量评分 |
+| Python 3 | Anaconda，`D:\anaconda3\python.exe`，用于数据安全检查和质量评分 |
 | Quarto | 渲染报告；建议单独安装并加入 `PATH`，也可临时使用 RStudio 自带版本 |
 | Git/GitHub CLI | 版本控制和协作 |
 
-本机 Stata 版本是 Stata 15，路径是：
+本机 Stata 版本是 Stata 18 MP，路径是：
 
 ```text
-C:\Program Files (x86)\Stata15\Stata-64.exe
+D:\Stata18\StataMP-64.exe
 ```
 
 如果本机通过 RStudio 提供 Quarto，常见路径是：

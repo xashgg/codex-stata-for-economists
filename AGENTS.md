@@ -36,7 +36,83 @@ This repository is a Stata empirical-research workflow template. Codex should pr
 - Keep exploration logs inside the corresponding exploration folder. Do not leave Stata console logs or run logs in the repository root.
 - If Stata batch mode creates a root-level console transcript such as `01_example.log`, move it to the relevant `explorations/<project_name>/logs/` folder, usually with a `_console.log` suffix.
 - Promote an exploration to production only after it is stable, documented, quality-checked, and intentionally wired into `dofiles/00_master.do`.
-- Cox proportional hazards / hazard-ratio examples belong in `explorations/` first unless the user explicitly asks to make them part of the production pipeline. Stata 15 supports the core workflow via `stset`, `stcox, hr`, `estat phtest`, and graph export.
+
+### Stata Execution Mode
+
+- During exploration, use `stata-mcp` for single-command checks and iterative debugging when available.
+- Routine MCP calls must explicitly use `session_id="default"`, which is also used by VS Code manual Run Selection requests, so both interfaces share Stata state.
+- Create named sessions only for user-requested isolation or parallel work, and report the session ID. `Stata: Restart Session` clears only `default`, not named sessions.
+- Do not create a temporary `.do` file merely to run one command. Save commands retained for analysis in the exploration's substantive `.do` files.
+- MCP state is diagnostic and may differ from a fresh run; unsaved interactive output is not final numerical evidence.
+- Validate stable exploration files in a fresh batch process. Production verification uses the relevant files and then `dofiles/00_master.do` where applicable.
+- Never run MCP and batch jobs concurrently against the same data, log, table, or figure.
+- If MCP is unavailable, say so; do not silently substitute batch/CMD or a temporary `.do` file for an MCP-only request.
+
+## Research Workflow and Do-file Orchestration
+
+Use the following lifecycle for new empirical work:
+
+1. **Start in exploration.** Create its README, dofiles, logs, tables, and figures directories.
+2. **Inspect before modeling.** Verify data, definitions, coding, missingness, and the proposed sample.
+3. **Develop iteratively.** Prefer MCP for focused checks; run only the needed exploration file for file-level tests.
+4. **Stabilize and document.** Record inputs, construction, sample rules, models, outputs, limitations, and commands.
+5. **Audit before promotion.** Check reproducibility, current logs, traceable outputs, data safety, and quality gates.
+6. **Promote intentionally.** Only on explicit request, move code by responsibility, redirect outputs, and wire `00_master.do` in dependency order.
+7. **Verify production.** Run promoted files separately, then the full pipeline, comparing key samples, specifications, and outputs.
+
+There is no mandatory rule that one command, model, or analysis module must have
+its own `.do` file. Do-file boundaries are a maintainability decision based on
+dependencies, independent rerun needs, runtime, and clarity. A single exploration
+do-file is valid. If an exploration becomes difficult to debug, Codex may propose a
+split, but must distinguish the proposal from a repository requirement and must not
+perform a large structural split without user authorization.
+
+An exploration-level orchestrator such as `dofiles/00_run_all.do` is optional. Use
+one when an exploration has multiple dependent do-files and benefits from a single
+reproduction entry point. It must write only to that exploration's directories and
+must not be wired into the production `dofiles/00_master.do` until promotion.
+
+When the user has not specified file boundaries, Codex should first propose a short
+mapping of each do-file's purpose, inputs, outputs, and execution order. Codex may
+choose routine filenames and logging details, but it must surface substantive choices
+such as sample exclusions, variable meanings, model specifications, fixed effects,
+and standard-error clustering rather than silently deciding them.
+
+### Prompt Templates
+
+Users may start an exploration with:
+
+```text
+请阅读 AGENTS.md 和 README.md。新建 exploration：<project_name>。
+数据位于 <data_path>，研究问题是 <research_question>，计划分析 <analyses>。
+请先检查数据并提出 do-file 编排、输入、输出和执行顺序，再实施。
+所有日志、表格和图形保存在该 exploration 内；不要修改生产 00_master.do。
+```
+
+Users may request focused debugging with:
+
+```text
+请只在 explorations/<project_name>/ 中调试 <specific_issue>。
+单行检查和迭代调试默认使用 stata-mcp；需要文件级测试时，只运行解决该问题所需的 do-file。
+不要完整运行生产 pipeline，不要修改生产文件。
+用当前日志或输出表格验证结论。
+```
+
+Users may request a promotion audit with:
+
+```text
+请对 explorations/<project_name>/ 做 production promotion audit，暂不迁移。
+检查可复现性、日志、输出、数据安全、变量与样本定义、模型设定和质量评分，
+列出尚未满足的生产条件。
+```
+
+Users may authorize production promotion with:
+
+```text
+explorations/<project_name>/ 已定稿。请将其按职责迁移到正式 dofiles/，
+更新输出路径，并按依赖顺序接入 dofiles/00_master.do。
+迁移前后分别运行并核对样本、模型和输出；不要改变未获授权的统计设定。
+```
 
 ## Non-Negotiable Rules
 
@@ -96,36 +172,30 @@ python scripts/check_data_safety.py --staged $(git diff --cached --name-only)
 
 ## Stata Conventions
 
-- Local Stata is Stata 15: `C:\Program Files (x86)\Stata15\Stata-64.exe`.
-- Pin Stata do-files to `version 15` unless the user explicitly changes the project standard.
-- Pin the Stata version at the top of each `.do` file.
-- Use one project-wide seed unless a task has a documented reason to do otherwise.
-- Open and close logs inside runnable do-files.
-- For teaching, exploration, or user-facing do-files, prefer explicit commands over Stata macro indirection. Avoid unnecessary `` `local' `` macro use, especially in regression specifications. If a command must be easy to run line-by-line in the Do-file Editor, write the full control-variable list directly in the command rather than relying on a prior `local controls ...` line.
-- Use local macros sparingly for stable paths or repeated filenames only when they materially improve readability. Do not hide key model choices, sample restrictions, or variable lists inside macros if that makes partial reruns fragile.
+- Pin the Stata version, use the project seed when randomness is involved, and open
+  and close logs inside independently runnable do-files.
+- Prefer explicit, line-by-line-readable specifications. Do not hide substantive model
+  choices, sample restrictions, or variable lists behind unnecessary macros.
 - Store estimation results with `estimates store` or `est store` when table assembly depends on them.
-- Export figures with native Stata `graph export` as both `.pdf` and `.png`; do not keep `.gph` as a committed artifact.
-- When generating a figure, always create both PDF and PNG outputs unless Stata itself cannot run.
-- Use a muted Stata-style graph design by default: white or very light gray background, subtle horizontal gridlines only, solid blue marks or bars using RGB `"49 145 255"` / HEX `#3191FF`, no glossy or gradient-like effects, no strong contrast edges, Arial or default Stata Sans fonts, normal-weight dark blue-gray titles, modest axis/tick label sizes, and Stata-default-like proportions with enough whitespace.
-- For survival curves, use the same graph style and follow the reference in `explorations/cox_hazard_ratio_simulation/dofiles/07_cox_hazard_ratio.do`: white `graphregion()` and `plotregion()`, restrained title color RGB `"31 55 73"`, subtitle/secondary text RGB `"74 89 105"`, focal or exposed series in RGB `"49 145 255"` / HEX `#3191FF` with solid medium-thick line, comparison series in muted blue-gray RGB `"142 164 184"` with dashed medium-thin line, subtle horizontal gridlines `glcolor(gs14) glwidth(vthin)`, horizontal white legend, small axis labels, and PNG width around 1800. In Stata 15, `stcurve` has limited line-style options; use `sts graph, by(...)` when reliable per-line styling is needed.
-- Prefer `esttab` outputs as `.tex` plus `.csv` for auditability.
+- Export figures with native Stata `graph export` as both PDF and PNG; do not commit
+  Stata binary graph files. Consult a relevant example only when detailed styling is
+  needed.
+- For descriptive-statistics and regression tables, read and follow
+  `.claude/skills/build-tables/SKILL.md`. That skill is the authoritative source for
+  formats, headers, precision, alignment, notes, and output verification.
 - Cluster standard errors at the most defensible aggregate level and document the choice.
-- For large CSV workflows, do not assume Stata can reliably import only selected columns across versions. If the source is too wide or slow, use a small reproducible Miniconda Python helper to stream selected columns into `data/derived/`, then have Stata read the narrow extract.
-- For user replication convenience, produce an analysis-ready `.dta` in `data/derived/` when the workflow requires substantial merging or cleaning. Keep the `.dta` gitignored and document the command to regenerate it.
-- Do not rely on Stata `shell` calls inside batch-mode do-files for required preprocessing. Run Python/R preprocessing explicitly before Stata, or fail with a clear message telling the user which helper command to run.
+- Keep required preprocessing outside Stata batch `shell` calls. When substantial
+  preprocessing is needed, create a reproducible analysis-ready dataset under
+  `data/derived/` and document how to regenerate it.
 - When using variables with encoded categories, verify from the codebook whether values are true quantities or category codes. Do not treat education, occupation, or survey response codes as continuous measures unless the codebook confirms they are measured on a numeric scale.
 - If a do-file includes numerical interpretation in comments, cite the generated log or output table in the comment and keep the numbers synchronized by rerunning the script after model changes.
 
 ## Local Environment
 
-- Python is Miniconda, not the Microsoft Store Python.
-- Miniconda root: `C:\ProgramData\Miniconda3`.
-- Conda executable: `C:\ProgramData\Miniconda3\Scripts\conda.exe`.
-- Python executable: `C:\ProgramData\Miniconda3\python.exe`.
-- Stata executable: `C:\Program Files (x86)\Stata15\Stata-64.exe`.
-- RStudio-bundled Quarto executable: `C:\Program Files\RStudio\resources\app\bin\quarto\bin\quarto.exe`.
-- Prefer explicit executable paths if `python`, `conda`, `stata`, or `quarto` are not found on `PATH`.
-- Prefer the explicit `quarto.exe` path over the RStudio-bundled `quarto.cmd` on Windows.
+- Tool locations vary by machine. Use the paths supplied by the user or discovered in
+  the current environment; do not encode machine-specific paths in project code.
+- Prefer explicit executable paths when a tool is not on `PATH`. On Windows, prefer
+  `quarto.exe` over a `.cmd` wrapper when paths contain spaces.
 
 ## Log Verification
 
@@ -156,7 +226,7 @@ Never add these to version control:
 
 Allowed committed outputs:
 
-- `output/tables/*.csv`, `*.tex`, and other small non-PII summary tables.
+- `output/tables/*.csv`, `*.tex`, `*.rtf`, and other small non-PII summary tables.
 - `output/figures/*.pdf`, `*.png`.
 - `explorations/*/output/tables/*.csv`, `*.xls`, and `*.xlsx` only when they are small non-PII teaching or sandbox summary tables.
 - Template/example fixtures only when intentionally whitelisted.

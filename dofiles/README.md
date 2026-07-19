@@ -21,6 +21,43 @@ Source code for the Stata pipeline.
 - Use `set seed YYYYMMDD` once per do-file when randomness is involved
 - Cluster SEs at the most aggregate plausible level by default — document the choice in a comment
 
+## File Boundaries and Orchestration
+
+The stage directories define responsibilities, not a mandatory file granularity.
+The repository does not require each command, model, table, or robustness check to
+have its own `.do` file. Choose boundaries based on:
+
+- data dependencies and execution order;
+- whether a stage needs to be rerun independently;
+- runtime and debugging cost;
+- clarity and reuse;
+- whether an intermediate analysis-ready dataset is needed.
+
+When promoting an exploration, first map its code to production responsibilities:
+
+```text
+raw data handling                 -> 01_clean/
+sample and variable construction  -> 02_construct/
+estimation and diagnostics        -> 03_analysis/
+final table/figure assembly       -> 04_output/
+reusable helper programs          -> _utils/
+```
+
+Then add explicit `do` calls to `00_master.do` in dependency order. Do not merely
+copy an exploration folder wholesale, and do not change sample or model choices as
+an undocumented side effect of restructuring.
+
+Before editing `00_master.do`, the user must explicitly authorize production
+promotion. A request to test, debug, or add an exploratory model is not production
+authorization.
+
+Suggested promotion request:
+
+```text
+explorations/<项目名>/ 已定稿。请按职责迁移到正式 dofiles/，更新日志和输出路径，
+按依赖顺序接入 dofiles/00_master.do，并比较迁移前后的样本、模型和结果。
+```
+
 See `.claude/rules/stata-coding-conventions.md` and `.claude/rules/stata-reproducibility-protocol.md`.
 
 ## Analysis Templates

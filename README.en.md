@@ -20,7 +20,7 @@
 
 **Author:** Chen Zhu | China Agricultural University (CAU)
 
-**Last updated:** 2026-06-02
+**Last updated:** 2026-07-19
 
 **Acknowledgment:** [@shy7890](https://github.com/shy7890) for bug fixes.
 
@@ -162,6 +162,23 @@ Method tests and simulations should start under `explorations/`. Current example
 - `explorations/educwages_tutorial/`
 - `explorations/staggered_did_simulation/`
 - `explorations/cox_hazard_ratio_simulation/`
+- `explorations/crowdfunding-attention/`
+
+## Exploration and stata-mcp
+
+During exploration, use [stata-mcp](https://github.com/hanlulong/stata-mcp/tree/main)
+for focused command checks and iterative debugging. The extension starts its local
+server automatically and exposes Stata output, an interactive command window, a data
+viewer, and graph panels inside VS Code. Run the current line or selection with
+`Ctrl+Shift+Enter`, the current do-file with `Ctrl+Shift+D`, and open commands such as
+**Stata: Interactive Mode**, **Stata: View Data**, and **Stata: Restart Session** from
+the Command Palette.
+
+Codex must explicitly use `session_id="default"` for routine MCP calls. Manual VS Code
+Run Selection requests also use the default session, allowing both interfaces to share
+loaded data, macros, programs, and estimates. Named sessions are reserved for explicitly
+requested isolation or parallel execution. Interactive MCP output remains diagnostic;
+stable do-files must be verified in a fresh batch process before production promotion.
 
 ## Core Rules
 
@@ -171,6 +188,8 @@ Method tests and simulations should start under `explorations/`. Current example
 - Keep `dofiles/00_master.do` as the single end-to-end entry point.
 - Put simulations and method experiments in `explorations/<project>/` first.
 - Export Stata figures as both `.pdf` and `.png`.
+- When descriptive-statistics or regression results are requested, first follow `.claude/skills/build-tables/SKILL.md`, then use `esttab` to export synchronized `.tex`, `.csv`, and Word-compatible `.rtf` tables by default.
+- In descriptive tables, format `N` with no decimals. For integer-valued variables, omit decimals for integer-valued `Min`/`Max`, but retain two decimals for `Mean` and `SD`. Align displayed decimals in rendered RTF/Word and LaTeX tables, and follow the same convention in CSV outputs.
 - Keep logs in the appropriate `logs/` folder; do not leave root-level Stata logs.
 
 ## Common Commands
@@ -215,16 +234,16 @@ python scripts/quality_score.py dofiles/03_analysis/main_regression.do
 
 ## Local Environment Notes
 
-This template is currently configured around Stata 15 on Windows:
+This machine currently uses Stata 18 MP:
 
 ```text
-C:\Program Files (x86)\Stata15\Stata-64.exe
+D:\Stata18\StataMP-64.exe
 ```
 
-Python is expected to be Miniconda:
+Python is provided by Anaconda:
 
 ```text
-C:\ProgramData\Miniconda3\python.exe
+D:\anaconda3\python.exe
 ```
 
 Forks can update these paths in their local setup, but do-files should use relative project paths.

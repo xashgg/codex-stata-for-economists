@@ -47,7 +47,7 @@
 │   └── README.md                   # Data dictionary + provenance
 ├── logs/                           # GITIGNORED — *.log/*.smcl per do-file run
 ├── output/
-│   ├── tables/                     # esttab .tex/.csv (committed)
+│   ├── tables/                     # esttab .tex/.csv/.rtf (committed)
 │   └── figures/                    # graph export .pdf/.png/.svg (committed)
 ├── reports/
 │   ├── analysis_report.qmd         # Quarto + Stata engine
@@ -88,15 +88,15 @@ python scripts/quality_score.py dofiles/03_analysis/main_regression.do
 
 ## Stata Conventions (Non-Negotiable)
 
-- **Stata version on this machine:** Stata 15 (`C:\Program Files (x86)\Stata15\Stata-64.exe`).
-  Added to PATH via `~/.bashrc` so `scripts/run_stata.sh` resolves it.
-  **Do NOT use Stata 18** even though it is installed — version mismatches break reproducibility.
-- **Python on this machine:** Miniconda at `C:\ProgramData\Miniconda3\python.exe`.
-  Conda is at `C:\ProgramData\Miniconda3\Scripts\conda.exe`.
+- **Stata on this machine:** Stata 18 MP at `D:\Stata18\StataMP-64.exe`.
+  Keep do-files version-pinned so local execution does not silently change their syntax contract.
+- **Python on this machine:** Anaconda at `D:\anaconda3\python.exe`.
 - **Quarto on this machine:** RStudio-bundled Quarto at `C:\Program Files\RStudio\resources\app\bin\quarto\bin\quarto.exe`. Use this absolute path if `quarto` is not on `PATH`; prefer `quarto.exe` over `quarto.cmd`.
-- **Pin Stata version** at top of every do-file: `version 15`
+- **Pin Stata version** at the top of every do-file; use the version declared by that analysis rather than silently changing it to match the installed executable.
 - **Required user-written commands:** `reghdfe`, `ftools`, `estout`, `ivreg2`, `boottest`. See `templates/master-do-template.do` for `ssc install` recipe.
 - **Per-do-file logging:** `capture log close` then `log using logs/<name>.log, replace text`
+- **Requested descriptive/regression tables:** first follow `.claude/skills/build-tables/SKILL.md`, then use `esttab` to export synchronized `.tex`, `.csv`, and Word-compatible `.rtf` files under `output/tables/`.
+- **Table number alignment:** format `N` with no decimals; for integer-valued variables, omit decimals for integer-valued `Min`/`Max` but retain two decimals for `Mean`/`SD`; verify decimal alignment in rendered `.tex` and `.rtf`/Word tables.
 - **Reproducible randomness:** `set seed YYYYMMDD` at the top, never inside loops
 - **Relative paths only** — never `cd` to absolute paths; always reference from project root
 - **Cluster SEs** at the most aggregate plausible level by default; document the choice

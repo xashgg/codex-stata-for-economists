@@ -58,7 +58,8 @@ Repeat
 - Cluster SEs at the most aggregate plausible level by default
 - Nothing under `data/raw/` or `data/derived/` is ever committed
 - Every claimed numerical result must trace to a log line — refuse to commit otherwise
-- Tables exported via `esttab` to both `.tex` (paper) and `.csv` (audit)
+- For requested descriptive-statistics and regression tables, follow `.claude/skills/build-tables/SKILL.md` and export via `esttab` to `.tex` (paper), `.csv` (audit), and `.rtf` (Microsoft Word)
+- Table precision: `N` has no decimals; integer-valued `Min`/`Max` have no decimals; `Mean`/`SD` default to two decimals even for integer-valued variables; rendered LaTeX and RTF/Word outputs align displayed decimals
 - Figures exported via `graph export` to `.pdf` (paper) and `.png` (web)
 
 ---

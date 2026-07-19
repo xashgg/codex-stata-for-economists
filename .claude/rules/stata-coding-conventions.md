@@ -74,6 +74,46 @@ esttab m_main using "output/tables/main_regression.csv", replace ///
     se star(* 0.10 ** 0.05 *** 0.01) plain
 ```
 
+Regression-table layout is fixed by default: one column per model, with the
+parenthesized standard error on the row immediately below its coefficient.
+Never put standard errors in a separate column to the right. Use top-level
+`b(...) se(...)` options in `esttab`; do not use `wide` or a `cells()` layout
+that creates adjacent coefficient and standard-error columns.
+
+Regression-table headers also use a fixed two-row hierarchy. The first header
+row contains only model numbers such as `(1)`, `(2)`, and `(3)`. The second
+header row contains the dependent-variable name for each model. Never combine
+the two into one cell (for example, do not write `Outcome (1)`). In `esttab`,
+use `mgroups("(1)" "(2)" ..., pattern(1 1 ...))` for the first row,
+`mtitles("Outcome A" "Outcome B" ...)` for the second row, and
+`collabels(none)` to suppress an unwanted third header row. Use explicit
+`prehead()`/`posthead()` only if ordinary options cannot preserve the required
+order in a particular output format.
+
+Regression tables use fixed three-decimal precision. Display coefficients,
+standard errors, R-squared values, dependent-variable means, and all other
+non-integer model statistics with exactly three digits after the decimal point.
+Display `N` and other inherently integer counts with zero decimals. Prefer
+`b(3) se(3)` and `stats(..., fmt(0 3 3 ...))`; never use adaptive formats such
+as `a3` for regression outputs unless the user explicitly requests them.
+
+Within each regression-model column, vertically align coefficients and their
+parenthesized standard errors on the decimal point. Ordinary right alignment
+is insufficient because signs, integer widths, parentheses, and significance
+stars can shift the visible decimal. For LaTeX, prefer
+`alignment(D{.}{.}{-1})` with `\usepackage{dcolumn}` or an equivalent `siunitx`
+numeric column. For RTF/Word, use decimal tab stops or an equivalent
+decimal-aligned cell layout and inspect the rendered document. CSV stores no
+visual alignment, so export fixed three-decimal values that remain numeric when
+opened in spreadsheet software.
+
+Place the exact regression-table note `Heteroskedasticity-robust standard errors in parentheses. *
+p<0.10, ** p<0.05, *** p<0.01` in one cell. Pass it to `addnotes()` as one
+string; never split the standard-error statement and significance thresholds
+into different strings, rows, or cells. Render it as one full-width cell in
+LaTeX and RTF/Word and as one field in CSV. Additional substantive notes may
+occupy separate cells.
+
 ## 6. Figures
 
 ```stata
